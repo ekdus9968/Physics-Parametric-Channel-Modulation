@@ -1,0 +1,7 @@
+ppcm_env/
+mmdetection/
+data/
+work_dirs/
+__pycache__/
+*.pyc
+*.pth
