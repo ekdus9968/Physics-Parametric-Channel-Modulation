@@ -1,0 +1,11 @@
+Training curve → work_dirs/ppcm_new\viz\training_curve.png
+
+python scripts/ppcm_new/train.py --no-stage1 --no-stage2 Epoch 12: avg_loss = 0.3519
+
+Training curve → work_dirs/ppcm_new\viz\training_curve.png python scripts/ppcm_new/train.py --no-stage1 --no-stage2
+
+python scripts/ppcm_new/evaluate.py (baseline)
+============================================================
+Ablation Summary
+============================================================
+Baseline (no PPCM)             mAP@50=44.18%  (+0.00%) ← best

@@ -5,3 +5,6 @@ work_dirs/
 __pycache__/
 *.pyc
 *.pth
+WaterMono/
+results.txt
+data_ruod/

@@ -135,6 +135,8 @@ python scripts/train_baseline.py
 python scripts/evaluate_baseline.py
 ```
 
+result: Type 7 Evaluation - 46.92%
+
 ### Phase 2 — Water Type & Depth Estimator Validation
 Goal: Verify reliability of PPCM inputs (coming soon)
 
