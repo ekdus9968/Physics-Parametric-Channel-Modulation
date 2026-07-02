@@ -27,18 +27,18 @@ print(f"Device: {DEVICE}")
 print("\n[1] Testing PPCM Stage 1...")
 s1 = PPCMStage1(alpha=0.5)
 
-img   = torch.rand(2, 3, 400, 600)        # (B,3,H,W) fake batch
-depth = torch.rand(2, 1, 400, 600) * 0.7  # mid-depth
+img   = torch.rand(2, 3, 400, 600)  # (B,3,H,W) fake batch
+# No depth for Stage 1
 
-corrected, bscat = s1(img, 'I', depth)
-print(f"  Input shape:      {img.shape}")
-print(f"  Corrected shape:  {corrected.shape}")
-print(f"  Backscatter shape:{bscat.shape}")
-print(f"  Input mean:    {img.mean():.4f}")
-print(f"  Corrected mean:{corrected.mean():.4f}  (should be lower — backscatter removed)")
-print(f"  Backscatter R mean: {bscat[:,0].mean():.4f}")
-print(f"  Backscatter G mean: {bscat[:,1].mean():.4f}")
-print(f"  Backscatter B mean: {bscat[:,2].mean():.4f}")
+corrected, bscat = s1(img, 'I')  # water_type only
+print(f"  Input shape:       {img.shape}")
+print(f"  Corrected shape:   {corrected.shape}")
+print(f"  Backscatter shape: {bscat.shape}")
+print(f"  Input mean:     {img.mean():.4f}")
+print(f"  Corrected mean: {corrected.mean():.4f}  (should be lower)")
+print(f"  Backscatter R (scalar map): {bscat[:,0].mean():.4f}")
+print(f"  Backscatter G (scalar map): {bscat[:,1].mean():.4f}")
+print(f"  Backscatter B (scalar map): {bscat[:,2].mean():.4f}")
 print("  ✓ Stage 1 OK")
 
 # Visualize Stage 1
@@ -55,11 +55,13 @@ save_stage1_visualization(
 print(f"  Stage 1 viz → {VIZ_DIR}/stage1_ep00_b0000.png")
 
 # Test all water types
-print("\n  Water type effect on backscatter (B_inf values):")
+print("\n  Water type effect (channel-specific, no spatial variation):")
 for wt in ['I', 'II', 'III', '1C', '5C', '9C']:
-    corr, bscat_wt = s1(img, wt, depth)
-    diff = (img - corr).abs().mean().item()
-    print(f"    Type {wt:3s}: mean removal = {diff:.4f}")
+    corr, bscat_wt = s1(img, wt)
+    diff = (img - corr).abs()
+    print(f"    Type {wt:3s}: R_removed={diff[:,0].mean():.4f}  "
+          f"G_removed={diff[:,1].mean():.4f}  "
+          f"B_removed={diff[:,2].mean():.4f}")
 
 # ── 2. Stage 2 standalone ──────────────────────────────────────────────
 print("\n[2] Testing PPCM Stage 2...")

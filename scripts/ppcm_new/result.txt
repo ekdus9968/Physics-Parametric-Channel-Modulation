@@ -9,3 +9,45 @@ python scripts/ppcm_new/evaluate.py (baseline)
 Ablation Summary
 ============================================================
 Baseline (no PPCM)             mAP@50=44.18%  (+0.00%) ← best
+
+
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.207
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.442
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.157
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.026
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.165
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.261
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.112
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.268
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.278
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.037
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.237
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.324
+  mAP@50:    44.18%
+  mAP@50:95: 20.66%
+
+
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.205
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.444
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.153
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.017
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.163
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.259
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.109
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.270
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.282
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.035
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.245
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.323
+  mAP@50:    44.36%
+  mAP@50:95: 20.50%
+
+Checkpoint not found: work_dirs/ppcm_new\s1=False_s2=True_epoch_12.pth
+
+Checkpoint not found: work_dirs/ppcm_new\s1=True_s2=True_epoch_12.pth
+
+============================================================
+Ablation Summary
+============================================================
+Baseline (no PPCM)             mAP@50=44.18%  (+0.00%)
+Stage 1 only                   mAP@50=44.36%  (+0.18%) ← best

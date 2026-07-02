@@ -64,29 +64,29 @@ class PPCMPipeline(nn.Module):
         """
         self.last_viz = {}
 
-        # ── PPCM Stage 1: pixel-space correction ──────────────────────
-        if self.use_stage1 and depth_maps is not None and water_types is not None:
-            corrected_images  = []
-            s1_viz_raw        = []
-            s1_viz_corrected  = []
+        # ── PPCM Stage 1: pixel-space channel correction (NO depth) ──
+        if self.use_stage1 and water_types is not None:
+            corrected_images   = []
+            s1_viz_raw         = []
+            s1_viz_corrected   = []
             s1_viz_backscatter = []
 
-            for img, depth, wt in zip(images, depth_maps, water_types):
-                raw_4d   = img.unsqueeze(0)         # (1,3,H,W)
-                depth_4d = depth.unsqueeze(0)       # (1,1,H,W)
+            for img, wt in zip(images, water_types):
+                raw_4d = img.unsqueeze(0)   # (1,3,H,W)
 
-                corrected, bscat = self.ppcm_s1(raw_4d, wt, depth_4d)
+                # Stage 1 uses water_type only — no depth
+                corrected, bscat = self.ppcm_s1(raw_4d, wt)
 
                 corrected_images.append(corrected.squeeze(0))
                 s1_viz_raw.append(img.detach().cpu())
                 s1_viz_corrected.append(corrected.squeeze(0).detach().cpu())
                 s1_viz_backscatter.append(bscat.squeeze(0).detach().cpu())
 
-            images = corrected_images  # pass corrected to backbone
+            images = corrected_images
 
             self.last_viz['stage1'] = {
-                'raw':        s1_viz_raw,
-                'corrected':  s1_viz_corrected,
+                'raw':         s1_viz_raw,
+                'corrected':   s1_viz_corrected,
                 'backscatter': s1_viz_backscatter,
             }
         else:
@@ -94,17 +94,52 @@ class PPCMPipeline(nn.Module):
 
         # ── PPCM Stage 2: FPN spatial weighting ───────────────────────
         # Hook on backbone to intercept FPN output
+        # Per-image processing to handle variable image sizes in batch
         s2_weight_maps = {}
 
         if self.use_stage2 and depth_maps is not None and water_types is not None:
-            # Use first image's water type for batch
-            # (per-image would need per-image FPN processing)
-            batch_wt    = water_types[0]
-            batch_depth = torch.stack(depth_maps, dim=0)  # (B,1,H,W)
+            _depth_maps   = depth_maps
+            _water_types  = water_types
+            _ppcm_s2      = self.ppcm_s2
 
             def fpn_hook(module, input, output):
-                modulated, wmaps = self.ppcm_s2(output, batch_wt, batch_depth)
-                s2_weight_maps.update(wmaps)
+                import torch.nn.functional as F
+                from iop_table import DEPTH_MIN, DEPTH_MAX, get_dominant_beta
+
+                modulated = {}
+
+                for key, feat in output.items():
+                    B, C, H, W   = feat.shape
+                    weighted_list = []
+
+                    for b in range(B):
+                        single_feat  = feat[b:b+1]           # (1, C, H, W)
+                        single_depth = _depth_maps[b]        # (1, H_orig, W_orig)
+                        single_wt    = _water_types[b]
+
+                        beta = get_dominant_beta(single_wt)
+                        z    = DEPTH_MIN + single_depth * (DEPTH_MAX - DEPTH_MIN)
+
+                        # Resize depth to this FPN level resolution
+                        z_r = F.interpolate(
+                            z.unsqueeze(0),
+                            size=(H, W),
+                            mode='bilinear',
+                            align_corners=False
+                        )  # (1, 1, H, W)
+
+                        weight = torch.exp(
+                            -beta * _ppcm_s2.depth_scale * z_r
+                        )
+                        weight = weight / (weight.mean() + 1e-8)
+                        weighted_list.append(single_feat * weight)
+
+                        # Save first image's weight map for visualization
+                        if b == 0 and key not in s2_weight_maps:
+                            s2_weight_maps[key] = weight.detach()
+
+                    modulated[key] = torch.cat(weighted_list, dim=0)
+
                 return modulated
 
             hook = self.detector.backbone.register_forward_hook(fpn_hook)
